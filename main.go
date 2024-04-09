@@ -3,12 +3,13 @@ package main
 import (
 	"flag"
 	"log"
+
+	"read-adviser-bot/clients/telegram"
 )
 
 func main() {
 
-	t := mustToken()
-	// tgClient = telegram.New(token)
+	tgClient := telegram.New(mustHost(), mustToken())
 
 	// fetcher = fetcher.New(tgClient)
 
@@ -32,4 +33,16 @@ func mustToken() string {
 	}
 
 	return *token
+}
+
+func mustHost() string {
+	host := flag.String(
+		"host",
+		"",
+		"api.telegram.org",
+	)
+
+	flag.Parse()
+
+	return *host
 }
