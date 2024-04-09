@@ -2,11 +2,11 @@ package telegram
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
 	"net/http"
 	"net/url"
 	"path"
+	"read-adviser-bot/lib/e"
 	"strconv"
 )
 
@@ -37,7 +37,9 @@ func newBasePath(token string) string {
 
 // Method for getting updates
 // https://core.telegram.org/bots/api#getting-updates
-func (c *Client) Updates(offset int, limit int) ([]Update, error) {
+func (c *Client) Updates(offset int, limit int) (updates []Update, err error) {
+	defer func() { err = e.Wrap("can't get updates", err) }()
+
 	// adding parameters offset and limit to request
 	q := url.Values{}
 	q.Add("offset", strconv.Itoa(offset))
@@ -67,7 +69,7 @@ func (c *Client) SendMessage(chatID int, text string) error {
 
 	_, err := c.doRequest(sendmessageMethod, q)
 	if err != nil {
-		return fmt.Errorf("can't send message: %w", err)
+		return e.Wrap("can't send message", err)
 	}
 
 	return nil
@@ -75,6 +77,8 @@ func (c *Client) SendMessage(chatID int, text string) error {
 
 // method for sending a request. Takes method and query, returns data and error
 func (c *Client) doRequest(method string, query url.Values) (data []byte, err error) {
+	defer func() { err = e.Wrap("can`t do request", err) }()
+
 	u := url.URL{
 		Scheme: "https",
 		Host:   c.host,
@@ -83,20 +87,20 @@ func (c *Client) doRequest(method string, query url.Values) (data []byte, err er
 
 	req, err := http.NewRequest(http.MethodGet, u.String(), nil)
 	if err != nil {
-		return nil, fmt.Errorf("can`t do request: %w", err)
+		return nil, err
 	}
 
 	req.URL.RawQuery = query.Encode()
 
 	resp, err := c.client.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("can`t do request: %w", err)
+		return nil, err
 	}
 	defer resp.Body.Close()
 
 	body, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return nil, fmt.Errorf("can`t do request: %w", err)
+		return nil, err
 	}
 
 	return body, nil
