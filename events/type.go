@@ -1,6 +1,6 @@
 package events
 
-type fetcher interface {
+type Fetcher interface {
 	Fetch(limit int) ([]Event, error)
 }
 
