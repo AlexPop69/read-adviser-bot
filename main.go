@@ -12,13 +12,13 @@ import (
 
 const (
 	storagePath = "file-storage"
-	batchSize   = 10
+	batchSize   = 100
 )
 
 func main() {
 
 	eventsProcessor := telegram.New(
-		tgClient.New("api.telegram.org", mustToken()),
+		tgClient.New(mustHost(), mustToken()),
 		files.New(storagePath),
 	)
 
@@ -62,3 +62,7 @@ func mustToken() string {
 
 // 	return *host
 // }
+
+func mustHost() string {
+	return "api.telegram.org"
+}
