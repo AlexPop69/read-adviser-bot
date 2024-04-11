@@ -30,8 +30,3 @@ type From struct {
 type Chat struct {
 	ID int `json:"id"` // Unique identifier for this chat
 }
-
-type Message struct {
-	ID   int    //
-	Text string //
-}
