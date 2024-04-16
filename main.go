@@ -4,24 +4,36 @@ import (
 	"flag"
 	"log"
 
-	"read-adviser-bot/clients/telegram"
+	tgClient "read-adviser-bot/clients/telegram"
+	eventconsumer "read-adviser-bot/consumer/event-consumer"
+	"read-adviser-bot/events/telegram"
+	"read-adviser-bot/storage/files"
+)
+
+const (
+	storagePath = "file-storage"
+	batchSize   = 100
 )
 
 func main() {
 
-	tgClient := telegram.New(mustHost(), mustToken())
+	eventsProcessor := telegram.New(
+		tgClient.New(mustHost(), mustToken()),
+		files.New(storagePath),
+	)
 
-	// fetcher = fetcher.New(tgClient)
+	log.Print("service started")
 
-	// processor = processor.New(tgClient)
-
-	// consumer.Start(fetcher, processor)
+	consumer := eventconsumer.New(eventsProcessor, eventsProcessor, batchSize)
+	if err := consumer.Start(); err != nil {
+		log.Fatal()
+	}
 }
 
 // функция для получения токена
 func mustToken() string {
 	token := flag.String(
-		"token-bot-token",
+		"tg-bot-token",
 		"",
 		"token for access to telegram bot",
 	)
@@ -35,14 +47,22 @@ func mustToken() string {
 	return *token
 }
 
+// func mustHost() string {
+// 	host := flag.String(
+// 		"tg-bot-host",
+// 		"api.telegram.org",
+// 		"api.telegram.org",
+// 	)
+
+// 	flag.Parse()
+
+// 	if *host == "" {
+// 		log.Fatal("host is not specified")
+// 	}
+
+// 	return *host
+// }
+
 func mustHost() string {
-	host := flag.String(
-		"host",
-		"",
-		"api.telegram.org",
-	)
-
-	flag.Parse()
-
-	return *host
+	return "api.telegram.org"
 }

@@ -4,6 +4,7 @@ import (
 	"encoding/gob"
 	"errors"
 	"fmt"
+	"log"
 	"math/rand"
 	"os"
 	"path/filepath"
@@ -56,7 +57,15 @@ func (s Storage) Save(page *storage.Page) (err error) {
 func (s Storage) PickRandom(userName string) (page *storage.Page, err error) {
 	defer func() { err = e.Wrap("can't pick random page", err) }()
 
-	path := filepath.Join(s.basePath, page.UserName)
+	path := filepath.Join(s.basePath, userName)
+
+	if _, err = os.Stat(path); err != nil {
+		if os.IsNotExist(err) {
+			log.Printf("storage for %s is not exist", userName)
+
+			return nil, storage.ErrNoSavedPages
+		}
+	}
 
 	files, err := os.ReadDir(path)
 	if err != nil {
