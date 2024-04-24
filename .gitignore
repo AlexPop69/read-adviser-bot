@@ -1,4 +1,6 @@
 #connect to database
 .env
 
+readme.txt
+
 compose.yaml
